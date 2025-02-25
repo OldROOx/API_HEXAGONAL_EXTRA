@@ -4,8 +4,6 @@ import (
 	"API_HEXAGONAL_RECU/src/core/database"
 	"API_HEXAGONAL_RECU/src/core/router"
 	"API_HEXAGONAL_RECU/src/core/server"
-	"API_HEXAGONAL_RECU/src/products/domain/entities"
-	userEntities "API_HEXAGONAL_RECU/src/users/domain/entities"
 	"log"
 )
 
@@ -13,11 +11,8 @@ func main() {
 	// Database connection
 	db := database.NewMySQLConnection()
 
-	// Auto-migrate entities
-	err := db.AutoMigrate(&userEntities.User{}, &entities.Product{})
-	if err != nil {
-		log.Fatalf("Error migrating database: %v", err)
-	}
+	// Skip auto-migration to preserve existing data
+	// We'll update the schema manually if needed
 
 	// Router setup
 	r := router.NewRouter(db)
