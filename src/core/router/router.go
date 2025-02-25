@@ -1,23 +1,20 @@
 package router
 
 import (
-	productController "API_HEXAGONAL_RECU/src/products/infrastructure/controllers"
-	userController "API_HEXAGONAL_RECU/src/users/infrastructure/controllers"
+	productInfra "API_HEXAGONAL_RECU/src/products/infrastructure"
+	userInfra "API_HEXAGONAL_RECU/src/users/infrastructure"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"time"
 )
 
 type Router struct {
-	engine            *gin.Engine
-	userController    *userController.UserController
-	productController *productController.ProductController
+	engine *gin.Engine
+	db     *gorm.DB
 }
 
-func NewRouter(
-	userController *userController.UserController,
-	productController *productController.ProductController,
-) *Router {
+func NewRouter(db *gorm.DB) *Router {
 	engine := gin.Default()
 
 	// Configuración CORS
@@ -31,35 +28,19 @@ func NewRouter(
 	}))
 
 	return &Router{
-		engine:            engine,
-		userController:    userController,
-		productController: productController,
+		engine: engine,
+		db:     db,
 	}
 }
 
 func (r *Router) SetupRoutes() {
 	api := r.engine.Group("/api")
-	{
-		// Rutas de usuarios
-		users := api.Group("/users")
-		{
-			users.GET("", r.userController.GetUsers)
-			users.POST("", r.userController.CreateUser)
-			users.GET("/:id", r.userController.GetUserByID)
-			users.PUT("/:id", r.userController.UpdateUser)
-			users.DELETE("/:id", r.userController.DeleteUser)
-		}
 
-		// Rutas de productos
-		products := api.Group("/products")
-		{
-			products.GET("", r.productController.GetProducts)
-			products.POST("", r.productController.CreateProduct)
-			products.GET("/:id", r.productController.GetProductByID)
-			products.PUT("/:id", r.productController.UpdateProduct)
-			products.DELETE("/:id", r.productController.DeleteProduct)
-		}
-	}
+	// Setup user routes
+	userInfra.SetupUserRoutes(api, r.db)
+
+	// Setup product routes
+	productInfra.SetupProductRoutes(api, r.db)
 }
 
 func (r *Router) GetEngine() *gin.Engine {

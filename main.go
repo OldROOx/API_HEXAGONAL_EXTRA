@@ -4,38 +4,28 @@ import (
 	"API_HEXAGONAL_RECU/src/core/database"
 	"API_HEXAGONAL_RECU/src/core/router"
 	"API_HEXAGONAL_RECU/src/core/server"
-	"API_HEXAGONAL_RECU/src/products/application"
-	productController "API_HEXAGONAL_RECU/src/products/infrastructure/controllers"
-	productRepo "API_HEXAGONAL_RECU/src/products/infrastructure/repositories/mysql"
-	userApplication "API_HEXAGONAL_RECU/src/users/application"
-	userController "API_HEXAGONAL_RECU/src/users/infrastructure/controllers"
-	userRepo "API_HEXAGONAL_RECU/src/users/infrastructure/repositories/mysql"
+	"API_HEXAGONAL_RECU/src/products/domain/entities"
+	userEntities "API_HEXAGONAL_RECU/src/users/domain/entities"
 	"log"
 )
 
 func main() {
-	// Inicializar la conexión a la base de datos
+	// Database connection
 	db := database.NewMySQLConnection()
 
-	// Inicializar repositorios
-	userRepository := userRepo.NewMySQLUserRepository(db)
-	productRepository := productRepo.NewMySQLProductRepository(db)
+	// Auto-migrate entities
+	err := db.AutoMigrate(&userEntities.User{}, &entities.Product{})
+	if err != nil {
+		log.Fatalf("Error migrating database: %v", err)
+	}
 
-	// Inicializar servicios
-	userService := userApplication.NewUserService(userRepository)
-	productService := application.NewProductService(productRepository)
-
-	// Inicializar controladores
-	userHandler := userController.NewUserController(userService)
-	productHandler := productController.NewProductController(productService)
-
-	// Configurar el router
-	r := router.NewRouter(userHandler, productHandler)
+	// Router setup
+	r := router.NewRouter(db)
 	r.SetupRoutes()
 
-	// Inicializar y arrancar el servidor
+	// Create server
 	srv := server.NewServer("8080", r.GetEngine())
-	if err := srv.Start(); err != nil {
-		log.Fatal("Error starting server:", err)
-	}
+
+	// Start server
+	log.Fatal(srv.Start())
 }

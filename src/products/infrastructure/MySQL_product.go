@@ -1,4 +1,4 @@
-package mysql
+package infrastructure
 
 import (
 	"API_HEXAGONAL_RECU/src/products/domain/entities"
