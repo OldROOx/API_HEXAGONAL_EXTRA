@@ -3,14 +3,24 @@ package infrastructure
 import (
 	"API_HEXAGONAL_RECU/src/products/domain/entities"
 	"gorm.io/gorm"
+	"sync"
 )
 
 type MySQLProductRepository struct {
 	db *gorm.DB
 }
 
+// Singleton pattern implementation
+var (
+	productRepoInstance *MySQLProductRepository
+	productRepoOnce     sync.Once
+)
+
 func NewMySQLProductRepository(db *gorm.DB) *MySQLProductRepository {
-	return &MySQLProductRepository{db: db}
+	productRepoOnce.Do(func() {
+		productRepoInstance = &MySQLProductRepository{db: db}
+	})
+	return productRepoInstance
 }
 
 func (r *MySQLProductRepository) GetProducts() ([]entities.Product, error) {

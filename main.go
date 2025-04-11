@@ -8,13 +8,10 @@ import (
 )
 
 func main() {
-	// Database connection
+	// Database connection (singleton)
 	db := database.NewMySQLConnection()
 
-	// Skip auto-migration to preserve existing data
-	// We'll update the schema manually if needed
-
-	// Router setup
+	// Router setup (will use singleton repositories)
 	r := router.NewRouter(db)
 	r.SetupRoutes()
 

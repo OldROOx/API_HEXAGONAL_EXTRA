@@ -15,10 +15,22 @@ func NewListUsersController(listUsersUseCase *application.ListUsersUseCase) *Lis
 }
 
 func (c *ListUsersController) Handle(ctx *gin.Context) {
-	users, err := c.listUsersUseCase.Execute()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	// Check if we should include products
+	includeProducts := ctx.Query("include_products") == "true"
+
+	if includeProducts {
+		usersWithProducts, err := c.listUsersUseCase.ExecuteWithProducts()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, usersWithProducts)
+	} else {
+		users, err := c.listUsersUseCase.Execute()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, users)
 	}
-	ctx.JSON(http.StatusOK, users)
 }

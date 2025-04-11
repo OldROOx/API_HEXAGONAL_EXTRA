@@ -22,11 +22,22 @@ func (c *GetUserByIDController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.getUserByIDUseCase.Execute(uint(id))
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
+	// Check if we should include products
+	includeProducts := ctx.Query("include_products") == "true"
 
-	ctx.JSON(http.StatusOK, user)
+	if includeProducts {
+		userWithProducts, err := c.getUserByIDUseCase.ExecuteWithProducts(uint(id))
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		ctx.JSON(http.StatusOK, userWithProducts)
+	} else {
+		user, err := c.getUserByIDUseCase.Execute(uint(id))
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		ctx.JSON(http.StatusOK, user)
+	}
 }

@@ -16,3 +16,7 @@ func NewGetUserByIDUseCase(userRepo repositories.UserRepository) *GetUserByIDUse
 func (uc *GetUserByIDUseCase) Execute(id uint) (*entities.User, error) {
 	return uc.userRepo.GetUserByID(id)
 }
+
+func (uc *GetUserByIDUseCase) ExecuteWithProducts(id uint) (*entities.UserWithProducts, error) {
+	return uc.userRepo.GetUserWithProductsByID(id)
+}

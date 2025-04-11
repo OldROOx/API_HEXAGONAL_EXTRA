@@ -16,3 +16,7 @@ func NewListUsersUseCase(userRepo repositories.UserRepository) *ListUsersUseCase
 func (uc *ListUsersUseCase) Execute() ([]entities.User, error) {
 	return uc.userRepo.GetUsers()
 }
+
+func (uc *ListUsersUseCase) ExecuteWithProducts() ([]entities.UserWithProducts, error) {
+	return uc.userRepo.GetUsersWithProducts()
+}
